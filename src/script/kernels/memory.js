@@ -1,8 +1,3 @@
-/**
- * Created by shuding on 6/9/15.
- * <ds303077135@gmail.com>
- */
-
 var Utils = require('script/kernels/utils');
 
 module.exports = Memory;

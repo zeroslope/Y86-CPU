@@ -32,8 +32,12 @@ For a detailed explanation on how things work, check out the [guide](http://vuej
 
 2. [vuetify.js]: https://vuetifyjs.com	"UI"
 
-3. mdi 
+3. mdi icon
 
 
 ### Vuetify
+
+
+
+npm install --save vue-material-design-icons
 

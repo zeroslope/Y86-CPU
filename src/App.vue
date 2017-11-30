@@ -1,16 +1,19 @@
 <template>
   <v-app>
     <!-- <img src="./assets/logo.png"> -->
-    <!-- A ToolBar 未解决白色条文字居中-->
-
     <v-card>
       <v-layout row wrap>
-          <v-flex>
+          <v-flex xs12 md6>
             <v-toolbar light dense app class="mb-0">
-              <v-toolbar-title>Y86 Simulators</v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-toolbar-title >Y86 Simulators</v-toolbar-title>
+                <v-btn icon>
+                   <v-icon>memory</v-icon>
+                </v-btn>
+                <v-spacer></v-spacer>
             </v-toolbar>
           </v-flex>
-          <v-flex>
+          <v-flex xs12 md6>
             <v-toolbar dark dense app>
               <v-spacer></v-spacer>
               <v-toolbar-title>By 55242</v-toolbar-title>
@@ -39,10 +42,10 @@
 
               <v-flex>
                 <v-layout row>
-                  <v-flex xs5 md4 class="mt-1">
+                  <v-flex xs4 md4 class="mt-1">
                     <clock></clock>
                   </v-flex>
-                  <v-flex xs7 md8 class="mt-1">
+                  <v-flex xs8 md8 class="mt-1">
                     <condition></condition>
                   </v-flex>
                 </v-layout>
@@ -81,7 +84,6 @@
 </template>
 
 <script>
-//import HelloWorld from './components/HelloWorld'
 import Control from './components/Control'
 import CodeBoard from './components/CodeBoard'
 import PipeLine from './components/Pipe'
@@ -89,6 +91,7 @@ import Memory from './components/Memory'
 import Registers from './components/Registers'
 import Clock from './components/Clock'
 import Condition from './components/Condition'
+var Constant = require('./script/kernels/constant');
 
 export default {
   name: 'app',
