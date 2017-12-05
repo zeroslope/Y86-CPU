@@ -1,16 +1,16 @@
 <template>
   <v-card hover ripple>
-    <h3 class="text-xs-center">CLOCK</h3>
+    <h3 class="text-xs-center">CPI</h3>
     <h2 class="text-xs-center">
-      {{ clock }}
+      {{ cpi }}
     </h2>
   </v-card>
 </template>
 
 <script>
   export default {
-    name: 'Clock',
-    props: ['clock']
+    name: 'Cpi',
+    props: ['cpi']
   }
 </script>
 

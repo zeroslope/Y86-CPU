@@ -1,15 +1,12 @@
-/**
- * Created by shuding on 6/9/15.
- * <ds303077135@gmail.com>
- */
+import Constant from './constant';
+import Memory from './memory';
+import _ from './register';
+import ALU from './alu';
 
-var Constant     = require('script/kernels/constant');
-var Memory       = require('script/kernels/memory');
-var Register     = require('script/kernels/register').Register;
-var PIPERegister = require('script/kernels/register').PIPERegister;
-var ALU          = require('script/kernels/alu');
+var Register = _.Register;
+var PIPERegister = _.PipeRegister;
 
-module.exports = CPU;
+export default CPU;
 
 function clone(obj) {
     if (null == obj || "object" != typeof obj) {
@@ -27,25 +24,26 @@ function clone(obj) {
 
 function saveHistory(cpu, cycle) {
     cpu.history[cycle] = {
-        Memory:      clone(cpu.Memory),
-        Register:    clone(cpu.Register),
-        Input:       clone(cpu.Input),
-        Output:      clone(cpu.Output),
-        ALU:         clone(cpu.ALU),
-        cycle:       cpu.cycle,
+        Memory: clone(cpu.Memory),
+        Register: clone(cpu.Register),
+        Input: clone(cpu.Input),
+        Output: clone(cpu.Output),
+        ALU: clone(cpu.ALU),
+        cycle: cpu.cycle,
         instruction: cpu.instruction,
-        state:       cpu.state,
-        halt:        cpu.halt,
-        mrmovl:      cpu.mrmovl,
-        popl:        cpu.popl,
-        cond:        cpu.cond,
-        ret:         cpu.ret,
-        use:         cpu.use,
-        mispredict:  cpu.mispredict
-    };
+        state: cpu.state,
+        halt: cpu.halt,
+        mrmovl: cpu.mrmovl,
+        popl: cpu.popl,
+        ret: cpu.ret,
+        cond: cpu.cond,
+        mispredict: cpu.mispredict,
+        use: cpu.use
+    }
 }
 
-function timeMachine(cpu, cycle) {
+function returnHistory(cpu, cycle) {
+    //console.log('CPU --> cycle: ' + cpu.cycle);
     cpu.Memory      = cpu.history[cycle].Memory;
     cpu.Register    = cpu.history[cycle].Register;
     cpu.Input       = cpu.history[cycle].Input;
@@ -61,6 +59,7 @@ function timeMachine(cpu, cycle) {
     cpu.ret         = cpu.history[cycle].ret;
     cpu.use         = cpu.history[cycle].use;
     cpu.mispredict  = cpu.history[cycle].mispredict;
+    //console.log('CPU --> cycle: ' + cpu.cycle);
 }
 
 function saveCPI (cpu, cycle, cpi) {
@@ -68,65 +67,63 @@ function saveCPI (cpu, cycle, cpi) {
 }
 
 function CPU() {
-    this.Memory   = new Memory();
-    this.Register = new Register();
-    this.Input    = new PIPERegister();
-    this.Output   = new PIPERegister();
-    this.ALU      = new ALU();
+    /*input 表示当前周期始的流水线寄存器状态*/
+    /*output 表示当前周期末的流水线寄存器状态*/
+    this.Memory     = new Memory();
+    this.Register   = new Register();
+    this.Input      = new PIPERegister();
+    this.Output     = new PIPERegister();
+    this.ALU        = new ALU();
 
-    this.history = [];
-    this.cpi     = [0];
+    this.history    = [];
+    this.cpi        = [0];
 
-    /**
-     * Initialization
-     */
     function init(cpu) {
-        cpu.cycle       = 0;
+        cpu.cycle = 0;
         cpu.instruction = 0;
-        cpu.state       = Constant.STAT_AOK;
-        cpu.halt        = false;
-
+        cpu.state = Constant.S_AOK;
+        cpu.halt = false;
         cpu.mrmovl = 0;
-        cpu.popl   = 0;
-        cpu.cond   = 0;
-        cpu.ret    = 0;
-
-        cpu.use        = 0;
+        cpu.popl = 0;
+        cpu.ret = 0;
+        cpu.cond = 0;
         cpu.mispredict = 0;
+        cpu.use = 0;
 
         saveHistory(cpu, 0);
     }
 
     init(this);
+
 }
 
-CPU.prototype.goto = function (cycle) {
-    if (cycle < this.history.length) {
-        timeMachine(this, cycle);
+CPU.prototype.goto = function (dest) {
+    if(dest < this.history.length) {
+        returnHistory(this, dest);
     }
 };
 
-CPU.prototype.backword = function () {
-    if (this.history[this.cycle - 1]) {
-        timeMachine(this, this.cycle - 1);
+CPU.prototype.backward = function () {
+    if(this.history[this.cycle - 1]) {
+        returnHistory(this, this.cycle-1);
     }
 };
 
 CPU.prototype.forward = function () {
-    if (this.cycle + 1 < this.history.length) {
-        timeMachine(this, this.cycle + 1);
-        return;
+    if(this.cycle + 1 < this.history.length) {
+        returnHistory(this, this.cycle+1);
+        return ;
     }
 
-    var input  = this.Input;
+    var input = this.Input;
     var output = this.Output;
 
-    if (input.W_icode == Constant.I_HALT) {
-        this.state = Constant.STAT_HLT;
+    if(input.W_icode === Constant.I_HALT) {
+        this.state = Constant.S_HLT;
     }
 
-    if (this.state != Constant.STAT_AOK && this.state != Constant.STAT_BUB) {
-        throw new Error('State error: ' + this.state);
+    if(this.state !== Constant.S_AOK && this.state !== Constant.S_BUB) {
+        throw new Error('State Error　' + this.state);
     }
 
     this.writeBack();
@@ -135,13 +132,13 @@ CPU.prototype.forward = function () {
     this.decode();
     this.fetch();
 
-    this.cycle++;
+    this.cycle ++;
 
-    if (this.state != Constant.STAT_BUB) {
-        this.instruction++;
+    if(this.state !== Constant.S_BUB) {
+        this.instruction ++;
     }
 
-    this.nextPIPERegister();
+    this.pipelineControl();
 
     saveCPI(this, this.cycle, this.updateCPI());
     saveHistory(this, this.cycle);
@@ -168,116 +165,127 @@ CPU.prototype.updateCPI = function () {
 
     return lp + mp * 2 + rp * 3 + 1;
 };
-
+/*
+##### Intermediate Values in Fetch Stage ###########################
+intsig imem_icode ’imem_icode’ # icode field from instruction memory
+intsig imem_ifun ’imem_ifun’ # ifun field from instruction memory
+intsig f_icode ’if_id_next->icode’ # (Possibly modified) instruction code
+intsig f_ifun ’if_id_next->ifun’ # Fetched instruction function
+intsig f_valC ’if_id_next->valc’ # Constant data of fetched instruction
+intsig f_valP ’if_id_next->valp’ # Address of following instruction
+boolsig imem_error ’imem_error’ # Error signal from instruction memory
+boolsig instr_valid ’instr_valid’ # Is fetched instruction valid?
+ */
 CPU.prototype.fetch = function () {
-    if (this.halt) {
-        return;
-    }
+    if(this.halt) return;
 
-    var input  = this.Input;
+    var input = this.Input;
     var output = this.Output;
 
-    var next;
-
-    if (input.M_icode == Constant.I_JXX && !input.M_Cnd) {
-        next = input.M_valA;
-    } else if (input.W_icode == Constant.I_RET) {
-        next = input.W_valM;
+    var nextPC;
+    if(input.M_icode == Constant.I_JXX && !input.M_Cnd) {
+        nextPC = input.M_valA;
+        //条件跳转不成立
+    } else if(input.W_icode == Constant.I_RET) {
+        nextPC = input.W_valM;
     } else {
-        next = input.F_predPC;
+        nextPC = input.F_predPC;
     }
 
-    var insruction = this.Memory.readByte(next++);
-    output.D_icode = insruction >> 4;
-    output.D_ifun  = insruction & 15;
+    var byte0 = this.Memory.readByte(nextPC ++);
+    output.D_icode  = byte0 >> 4;
+    output.D_ifun   = byte0 & 15;
 
-    if ([Constant.I_NOP, Constant.I_HALT, Constant.I_RRMOVL, Constant.I_IRMOVL, Constant.I_RMMOVL, Constant.I_MRMOVL, Constant.I_OPL, Constant.I_JXX, Constant.I_CALL, Constant.I_RET, Constant.I_PUSHL, Constant.I_POPL, Constant.I_LEAVE, Constant.I_IADDL].indexOf(output.D_icode) == -1) {
-        output.F_stat = output.D_stat = Constant.STAT_INS;
-        return;
-    } else if (output.D_icode == Constant.I_HALT) {
-        output.F_stat = output.D_stat = Constant.STAT_HLT;
-        return;
+    /* INSTRUCTION内部都是字符串，而不是对应的指令序号*/
+    if( [Constant.I_NOP,Constant.I_HALT,Constant.I_RRMOVL,Constant.I_IRMOVL,Constant.I_RMMOVL,Constant.I_MRMOVL,Constant.I_OPL,Constant.I_JXX,Constant.I_CALL,Constant.I_RET,Constant.I_PUSHL,Constant.I_POPL].indexOf(output.D_icode) == -1 ) {
+        output.D_stat = output.F_stat = Constant.S_INS;
+        return ;
+    } else if( output.D_icode == Constant.I_HALT) {
+        output.D_stat = output.F_stat = Constant.S_HLT;
+        return ;
     } else {
-        output.F_stat = output.D_stat = Constant.STAT_AOK;
+        output.D_stat = output.F_stat = Constant.S_AOK;
     }
 
-    if ([Constant.I_RRMOVL, Constant.I_OPL, Constant.I_IRMOVL, Constant.I_MRMOVL, Constant.I_RMMOVL, Constant.I_PUSHL, Constant.I_POPL, Constant.I_IADDL].indexOf(output.D_icode) != -1) {
-        var regByte = this.Memory.readByte(next++);
-        output.D_rA = regByte >> 4;
-        output.D_rB = regByte & 15;
+    /* D_icode 忘记加　output... */
+    //var need_regids = ;
+    //Constant.I_POPL 写成 Constant.IPOPL
+    if([Constant.I_RRMOVL,Constant.I_IRMOVL,Constant.I_RMMOVL,Constant.I_MRMOVL,Constant.I_OPL,Constant.I_PUSHL,Constant.I_POPL].indexOf(output.D_icode) !== -1) {
+        var byte1   = this.Memory.readByte(nextPC ++);
+        output.D_rA = byte1 >> 4;
+        output.D_rB = byte1 & 15;
     } else {
         output.D_rA = output.D_rB = Constant.R_NONE;
     }
 
-    if ([Constant.I_IRMOVL, Constant.I_RMMOVL, Constant.I_MRMOVL, Constant.I_JXX, Constant.I_CALL, Constant.I_IADDL].indexOf(output.D_icode) != -1) {
-        output.D_valC = this.Memory.readInt(next);
-        next += 4;
+    if([Constant.I_IRMOVL,Constant.I_RMMOVL,Constant.I_MRMOVL,Constant.I_JXX,Constant.I_CALL].indexOf(output.D_icode) !== -1) {
+        output.D_valC = this.Memory.readInt(nextPC);
+        nextPC += 4;
     }
 
-    output.F_predPC = next;
-    if ([Constant.I_JXX, Constant.I_CALL].indexOf(output.D_icode) != -1) {
+    output.F_predPC = nextPC;
+    if([Constant.I_JXX, Constant.I_CALL].indexOf(output.D_icode) !== -1) {
         output.F_predPC = output.D_valC;
     }
-    output.D_valP = next;
+    output.D_valP = nextPC;
 };
 
 CPU.prototype.decode = function () {
-
-    var input  = this.Input;
+    var input = this.Input;
     var output = this.Output;
 
-    output.E_icode = input.D_icode;
-    output.E_ifun  = input.D_ifun;
-    output.E_valC  = input.D_valC;
-    output.E_stat  = input.D_stat;
+    //output.E_stat   = input.D_ifun; 我怕是个傻子
+    output.E_stat   = input.D_stat;
+    output.E_icode  = input.D_icode;
+    output.E_ifun   = input.D_ifun;
+    output.E_valC   = input.D_valC;
 
-    if ([Constant.I_RRMOVL, Constant.I_RMMOVL, Constant.I_OPL, Constant.I_PUSHL].indexOf(input.D_icode) != -1) {
+    /*output.E_srcA*/
+    if([Constant.I_RRMOVL,Constant.I_RMMOVL,Constant.I_OPL,Constant.I_PUSHL].indexOf(input.D_icode) !== -1) {
         output.E_srcA = input.D_rA;
-    } else if ([Constant.I_POPL, Constant.I_RET].indexOf(input.D_icode) != -1) {
+    } else if([Constant.I_POPL,Constant.I_RET].indexOf(input.D_icode) !== -1) {
         output.E_srcA = Constant.R_ESP;
-    } else if (input.D_icode == Constant.I_LEAVE) {
-        output.E_srcA = Constant.R_EBP;
     } else {
         output.E_srcA = Constant.R_NONE;
     }
 
-    if ([Constant.I_OPL, Constant.I_RMMOVL, Constant.I_MRMOVL, Constant.I_IADDL].indexOf(input.D_icode) != -1) {
+    /*output.E_srcB ? I_IADDL */
+    if([Constant.I_MRMOVL,Constant.I_OPL,Constant.I_IRMOVL].indexOf(input.D_icode) !== -1) {
         output.E_srcB = input.D_rB;
-    } else if ([Constant.I_PUSHL, Constant.I_POPL, Constant.I_CALL, Constant.I_RET].indexOf(input.D_icode) != -1) {
+    } else if([Constant.I_POPL,Constant.I_PUSHL,Constant.I_CALL,Constant.I_RET].indexOf(input.D_icode) !== -1) {
         output.E_srcB = Constant.R_ESP;
-    } else if (input.D_icode == Constant.I_LEAVE) {
-        output.E_srcB = Constant.R_EBP;
     } else {
         output.E_srcB = Constant.R_NONE;
     }
 
-    if ([Constant.I_RRMOVL, Constant.I_IRMOVL, Constant.I_OPL, Constant.I_IADDL].indexOf(input.D_icode) != -1) {
+    /* output.E_dstE */
+    if([Constant.I_RRMOVL,Constant.I_IRMOVL,Constant.I_OPL].indexOf(input.D_icode) !== -1) {
         output.E_dstE = input.D_rB;
-    } else if ([Constant.I_PUSHL, Constant.I_POPL, Constant.I_CALL, Constant.I_RET, Constant.I_LEAVE].indexOf(input.D_icode) != -1) {
+    } else if([Constant.I_PUSHL,Constant.I_POPL,Constant.I_RET,Constant.I_CALL].indexOf(input.D_icode) !== -1) {
         output.E_dstE = Constant.R_ESP;
     } else {
         output.E_dstE = Constant.R_NONE;
     }
 
-    if ([Constant.I_MRMOVL, Constant.I_POPL].indexOf(input.D_icode) != -1) {
+    /* output.E_dstM 需要注意mrmovel的输入的寄存器的顺序*/
+    if([Constant.I_MRMOVL,Constant.I_POPL].indexOf(input.D_icode) !== -1) {
         output.E_dstM = input.D_rA;
-    } else if (input.D_icode == Constant.I_LEAVE) {
-        output.E_dstM = Constant.R_EBP;
     } else {
         output.E_dstM = Constant.R_NONE;
     }
 
-    if ([Constant.I_CALL, Constant.I_JXX].indexOf(input.D_icode) != -1) {
+    //E_srcA 写成了　D_srcA
+    if([Constant.I_CALL,Constant.I_JXX].indexOf(input.D_icode) !== -1) {
         output.E_valA = input.D_valP;
-    } else if (output.E_srcA == output.M_dstE) {
+    } else if(output.E_srcA === output.M_dstE) {
         output.E_valA = output.M_valE;
-    } else if (output.E_srcA == input.M_dstM) {
+    } else if(output.E_srcA === input.M_dstM) {
         output.E_valA = output.W_valM;
-    } else if (output.E_srcA == input.M_dstE) {
+    } else if(output.E_srcA === input.M_dstE) {
         output.E_valA = input.M_valE;
-    } else if (output.E_srcA == input.W_dstM) {
+    } else if(output.E_srcA === input.W_dstM) {
         output.E_valA = input.W_valM;
-    } else if (output.E_srcA == input.W_dstE) {
+    } else if(output.E_srcA === input.W_dstE) {
         output.E_valA = input.W_valE;
     } else {
         output.E_valA = this.Register.get(output.E_srcA);
@@ -299,107 +307,118 @@ CPU.prototype.decode = function () {
 
 };
 
-CPU.prototype.execute = function () {
 
-    var input  = this.Input;
-    var output = this.Output;
-    var alu    = this.ALU;
+CPU.prototype.execute = function() {
 
+    var input   = this.Input;
+    var output  = this.Output;
+    var alu     = this.ALU;
+
+    output.M_stat  = input.E_stat;
     output.M_icode = input.E_icode;
     output.M_valA  = input.E_valA;
     output.M_dstM  = input.E_dstM;
-    output.M_stat  = input.E_stat;
 
     if (input.E_icode == Constant.I_MRMOVL) {
-        this.mrmovl++;
+        this.mrmovl ++;
     }
     if (input.E_icode == Constant.I_POPL) {
-        this.popl++;
+        this.popl ++;
     }
     if (input.E_icode == Constant.I_JXX) {
-        this.cond++;
+        this.cond ++;
     }
     if (input.E_icode == Constant.I_RET) {
-        this.ret++;
+        this.ret ++;
     }
 
-    if (input.E_icode == Constant.I_HALT && input.E_stat != Constant.STAT_BUB) {
-        this.halt     = true;
-        output.M_stat = Constant.STAT_HLT;
+    if(input.E_icode === Constant.I_HALT && input.E_stat !== Constant.S_BUB) {
+        this.halt = true;
+        output.M_stat = Constant.S_HLT;
     }
 
-    // ALU-A
-    if ([Constant.I_RRMOVL, Constant.I_OPL].indexOf(input.E_icode) != -1) {
+    /* aluA*/
+    if([Constant.I_RRMOVL,Constant.I_OPL].indexOf(input.E_icode) !== -1) {
         alu.config.setInA(input.E_valA);
-    } else if ([Constant.I_IRMOVL, Constant.I_RMMOVL, Constant.I_MRMOVL, Constant.I_IADDL].indexOf(input.E_icode) != -1) {
+    } else if([Constant.I_IRMOVL,Constant.I_RMMOVL,Constant.I_MRMOVL].indexOf(input.E_icode) !== -1) {
         alu.config.setInA(input.E_valC);
-    } else if ([Constant.I_CALL, Constant.I_PUSHL].indexOf(input.E_icode) != -1) {
+    } else if([Constant.I_CALL,Constant.I_PUSHL].indexOf(input.E_icode) !== -1) {
         alu.config.setInA(-4);
-    } else if ([Constant.I_RET, Constant.I_POPL, Constant.I_LEAVE].indexOf(input.E_icode) != -1) {
-        alu.config.setInA(4);
+        // 把　input.E_icode 写成了　input.D_icode 反思
+    } else if([Constant.I_RET,Constant.I_POPL].indexOf(input.E_icode) !== -1) {
+        alu.config.setInA( 4);
     } else {
-        alu.config.setInA(0);
+        alu.config.setInA( 0);
     }
 
-    // ALU-B
-    if ([Constant.I_RMMOVL, Constant.I_MRMOVL, Constant.I_OPL, Constant.I_CALL, Constant.I_PUSHL, Constant.I_RET, Constant.I_POPL, Constant.I_IADDL, Constant.I_LEAVE].indexOf(input.E_icode) != -1) {
+    /* aluB */
+    if([Constant.I_OPL,Constant.I_RMMOVL,Constant.I_MRMOVL,Constant.I_CALL,Constant.I_PUSHL,Constant.I_RET,Constant.I_POPL].indexOf(input.E_icode) !== -1) {
         alu.config.setInB(input.E_valB);
     } else {
         alu.config.setInB(0);
     }
+    //else ???
 
-    // ALU-fCode
-    if (input.E_icode == Constant.I_OPL) {
+    /*alu-FCode 默认为加法*/
+    if(input.E_icode === Constant.I_OPL) {
         alu.config.setFCode(input.E_ifun);
     } else {
         alu.config.setFCode(0);
     }
 
-    // ALU-Update
-    if ([Constant.I_OPL, Constant.I_IADDL].indexOf(input.E_icode) != -1 && [Constant.STAT_ADR, Constant.STAT_INS, Constant.STAT_HLT].indexOf(output.W_stat) == -1 && [Constant.STAT_ADR, Constant.STAT_INS, Constant.STAT_HLT].indexOf(input.W_stat) == -1) {
+    /* alu-update I_IADDL m_stat = output.W_stat*/
+    if ([Constant.I_OPL].indexOf(input.E_icode) !== -1 && [Constant.S_ADR, Constant.S_INS, Constant.S_HLT].indexOf(output.W_stat) === -1 && [Constant.S_ADR, Constant.S_INS, Constant.S_HLT].indexOf(input.W_stat) === -1) {
         alu.config.setUpdate(1);
     } else {
         alu.config.setUpdate(0);
     }
 
-    output.M_valE = alu.execute();
-    output.M_Cnd  = alu.condition(input.E_ifun);
-    output.M_valA = input.E_valA;
+    output.M_valE   = alu.execute();
+    output.M_Cnd    = alu.condition(input.E_ifun);
+    /* ? */
+    output.M_valA   = input.E_valA;
 
-    if (input.E_icode == Constant.I_RRMOVL && !output.M_Cnd) {
+    /* ? */
+    if(input.E_icode === Constant.I_RRMOVL && !output.M_Cnd) {
         output.M_dstE = Constant.R_NONE;
     } else {
         output.M_dstE = input.E_dstE;
     }
 };
 
+
 CPU.prototype.memory = function () {
 
     var input  = this.Input;
     var output = this.Output;
 
-    var rMem = false, wMem = false, mAddr = 0;
+    var readMem = false, writeMem = false, mAddr = 0;
 
-    output.W_stat  = input.M_stat;
+    output.W_stat = input.M_stat;
     output.W_icode = input.M_icode;
     output.W_valE  = input.M_valE;
     output.W_dstE  = input.M_dstE;
     output.W_dstM  = input.M_dstM;
 
-    if ([Constant.I_RMMOVL, Constant.I_PUSHL, Constant.I_CALL, Constant.I_MRMOVL].indexOf(input.M_icode) != -1) {
+    if ([Constant.I_RMMOVL, Constant.I_PUSHL, Constant.I_CALL, Constant.I_MRMOVL].indexOf(input.M_icode) !== -1) {
         mAddr = input.M_valE;
-    } else if ([Constant.I_POPL, Constant.I_RET, Constant.I_LEAVE].indexOf(input.M_icode) != -1) {
+    } else if ([Constant.I_POPL, Constant.I_RET].indexOf(input.M_icode) !== -1) {
         mAddr = input.M_valA;
     }
 
-    rMem = [Constant.I_MRMOVL, Constant.I_POPL, Constant.I_RET, Constant.I_LEAVE].indexOf(input.M_icode) != -1;
+    if([Constant.I_MRMOVL,Constant.I_POPL,Constant.I_RET].indexOf(input.M_icode) !== -1) {
+        readMem = true;
+    }
 
-    wMem = [Constant.I_RMMOVL, Constant.I_PUSHL, Constant.I_CALL].indexOf(input.M_icode) != -1;
+    if([Constant.I_RMMOVL,Constant.I_PUSHL,Constant.I_CALL].indexOf(input.M_icode) !== -1) {
+        writeMem = true;
+    }
 
-    if (rMem) {
+    if(readMem) {
         output.W_valM = this.Memory.readInt(mAddr);
     }
-    if (wMem) {
+    /* 内存地址非法的判断 */
+    if(writeMem) {
         this.Memory.writeInt(mAddr, input.M_valA);
     }
 };
@@ -409,28 +428,28 @@ CPU.prototype.writeBack = function () {
     var input = this.Input;
 
     this.state = input.W_stat;
-    if (input.W_icode == Constant.I_RMMOVL) {
-        return;
+    if(input.W_icode === Constant.I_RMMOVL) {
+        return ;
     }
 
     this.Register.set(input.W_dstE, input.W_valE);
     this.Register.set(input.W_dstM, input.W_valM);
 };
 
-CPU.prototype.nextPIPERegister = function () {
+CPU.prototype.pipelineControl = function () {
+    var input   = this.Input;
+    var output  = this.Output;
 
-    var input  = this.Input;
-    var output = this.Output;
+    var F_bubble = 0;
+    var F_stall = (([Constant.I_MRMOVL,Constant.I_POPL].indexOf(input.E_icode) !== -1) && ([output.E_srcA,output.E_srcB].indexOf(input.E_dstM) !== -1) ) || ([input.D_icode,input.E_icode,input.M_icode].indexOf(Constant.I_RET) !== -1);
 
-    var F_stall = (([Constant.I_MRMOVL, Constant.I_POPL, Constant.I_LEAVE].indexOf(input.E_icode) != -1) && ([output.E_srcA, output.E_srcB].indexOf(input.E_dstM) != -1)) || ([input.D_icode, input.E_icode, input.M_icode].indexOf(Constant.I_RET) != -1);
+    var D_stall = (([Constant.I_MRMOVL,Constant.I_POPL].indexOf(input.E_icode) !== -1) && ([output.E_srcA,output.E_srcB].indexOf(input.E_dstM) !== -1) );
+    var D_bubble = (input.E_icode === Constant.I_JXX && !output.M_Cnd) || ((!D_stall) && ! ([input.D_icode,input.E_icode,input.M_icode].indexOf(Constant.I_RET)));
 
-    var D_stall = ([Constant.I_MRMOVL, Constant.I_POPL, Constant.I_LEAVE].indexOf(input.E_icode) != -1) && ([output.E_srcA, output.E_srcB].indexOf(input.E_dstM) != -1);
+    var E_stall = 0;
+    var E_bubble = (input.E_icode === Constant.I_JXX && !output.M_Cnd) || (([Constant.I_MRMOVL, Constant.I_POPL].indexOf(input.E_icode) !== -1 && [output.E_srcA, output.E_srcB].indexOf(input.E_dstM) !== -1));
 
-    var D_bubble = (input.E_icode == Constant.I_JXX && !output.M_Cnd) || ((!D_stall) && ([input.D_icode, input.E_icode, input.M_icode].indexOf(Constant.I_RET) != -1));
-
-    var E_bubble = (input.E_icode == Constant.I_JXX && !output.M_Cnd) || (([Constant.I_MRMOVL, Constant.I_POPL, Constant.I_LEAVE].indexOf(input.E_icode) != -1 && [output.E_srcA, output.E_srcB].indexOf(input.E_dstM) != -1));
-
-    var M_bubble = [Constant.STAT_ADR, Constant.STAT_INS, Constant.STAT_HLT].indexOf(output.W_stat) != -1 || [Constant.STAT_ADR, Constant.STAT_INS, Constant.STAT_HLT].indexOf(input.W_stat) != -1;
+    var M_bubble = [Constant.S_ADR, Constant.S_INS,Constant.S_HLT].indexOf(output.W_stat) != -1 || [Constant.S_ADR, Constant.S_INS,Constant.S_HLT].indexOf(input.W_stat) !== -1;
 
     if (([Constant.I_MRMOVL, Constant.I_POPL].indexOf(input.E_icode) != -1) && (input.E_dstM == input.E_srcA || input.E_dstM == input.E_srcB)) {
         this.use++;
@@ -440,58 +459,58 @@ CPU.prototype.nextPIPERegister = function () {
         this.mispredict++;
     }
 
-    // Copy from output
     var reg = new PIPERegister();
-    for (var name in output) {
-        if (output.hasOwnProperty(name)) {
+    for(var name in output) {
+        if(output.hasOwnProperty(name)) {
             reg.set(name, output[name]);
         }
     }
 
-    if (M_bubble) {
+    if(M_bubble) {
         reg.set({
-            M_icode: Constant.I_NOP,
-            M_stat:  Constant.STAT_BUB,
-            M_dstE:  Constant.R_NONE,
-            M_dstM:  Constant.R_NONE,
-            M_Cnd:   false
+            M_icode:    Constant.I_NOP,
+            M_stat:     Constant.S_BUB,
+            M_dstE:     Constant.R_NONE,
+            M_dstM:     Constant.R_NONE,
+            M_Cnd:      false
         });
     }
 
-    if (E_bubble) {
+    if(E_bubble) {
         reg.set({
-            E_icode: Constant.I_NOP,
-            E_ifun:  0,
-            E_stat:  Constant.STAT_BUB,
-            E_dstE:  Constant.R_NONE,
-            E_dstM:  Constant.R_NONE,
-            E_srcA:  Constant.R_NONE,
-            E_srcB:  Constant.R_NONE
+            E_icode:    Constant.I_NOP,
+            E_ifun:     0,
+            E_stat:     Constant.S_BUB,
+            E_srcA:     Constant.R_NONE,
+            E_srcB:     Constant.R_NONE,
+            E_dstE:     Constant.R_NONE,
+            E_dstM:     Constant.R_NONE
         });
     }
 
-    if (D_stall) {
+    if(D_stall) {
         reg.set({
-            D_icode: input.D_icode,
-            D_ifun:  input.D_ifun,
-            D_rA:    input.D_rA,
-            D_rB:    input.D_rB,
-            D_valC:  input.D_valC,
-            D_valP:  input.D_valP
+            D_icode:    input.D_icode,
+            D_ifun:     input.D_ifun,
+            D_rA:       input.D_rA,
+            D_rB:       input.D_rB,
+            D_valC:     input.D_valC,
+            D_valP:     input.D_valP
         });
     }
 
-    if (D_bubble) {
+    if(D_bubble) {
         reg.set({
-            D_icode: Constant.I_NOP,
-            D_ifun:  0,
-            D_stat:  Constant.STAT_BUB
-        });
+            D_icode:    Constant.I_NOP,
+            D_ifun:     0,
+            D_stat:     Constant.S_BUB
+        })
     }
 
-    if (F_stall) {
+    if(F_stall) {
         reg.set('F_predPC', input.F_predPC);
     }
 
+    /* 又搞错了大小写…… */
     this.Input = reg;
 };

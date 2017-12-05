@@ -1,19 +1,16 @@
 <template>
-    <v-flex >
-      <v-card>
-        <v-card-title>
-          <div>
-            <div class="headline">CONDITIONS</div>
-            <div class="title">ZF = 0　SF = 0　OF = 0</div>
-          </div>
-        </v-card-title>
-      </v-card>
-    </v-flex>
+  <v-card hover ripple>
+    <div>
+      <h3 class="text-xs-center">CONDITIONS</h3>
+      <h2 class="text-xs-center">ZF = {{cond.ZF}}　SF = {{cond.SF}}　OF = {{cond.OF}} </h2>
+    </div>
+  </v-card>
 </template>
 
 <script>
   export default {
     name: 'Registers',
+    props: ['cond'],
     data () {
       return {
 

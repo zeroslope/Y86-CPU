@@ -1,4 +1,4 @@
-module.exports = {
+export default {
 
     STATE: [
         'S_BUB',
@@ -77,7 +77,13 @@ module.exports = {
     C_GE:   5,
     C_G:    6,
 
-    /*CPU state*/
+    /**
+     * Bubble
+     * 正常操作
+     * 处理器执行halt指令
+     * 遇到非法地址
+     * 遇到非法指令
+     */
     S_BUB: 0,
     S_AOK: 1,
     S_HLT: 2,
@@ -94,25 +100,5 @@ module.exports = {
     R_EBP: 5,
     R_ESI: 6,
     R_EDI: 7,
-    R_NONE: 8
+    R_NONE: 0xf
 };
-
-/*window.getStateName = function (id) {
-    id = parseInt(id);
-    if (id < 0 || id > 5) return null;
-    return STATE[id];
-};
-
-window.getInstructionName = function (id) {
-    id = parseInt(id);
-    if (id < 0 || id > 12) return null;
-    return INSTRUCTION[id];
-};
-
-window.getRegisterName = function name(params) {
-    id = parseInt(id);
-    if (id < 0 || id > 8) return null;
-    return REGISTERS[id];
-};
-
-window.CONST = constans;*/

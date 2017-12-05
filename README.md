@@ -30,9 +30,9 @@ For a detailed explanation on how things work, check out the [guide](http://vuej
 
 1. vue.js
 
-2. [vuetify.js]: https://vuetifyjs.com	"UI"
+  2. [vuetify.js]: https://vuetifyjs.com&quot;UI&quot;
 
-3. mdi icon
+2. mdi icon
 
 
 ### Vuetify
@@ -41,3 +41,6 @@ For a detailed explanation on how things work, check out the [guide](http://vuej
 
 npm install --save vue-material-design-icons
 
+node.js 不能直接运行es6模块的代码
+
+vue　webpack中不能混用require 和　import

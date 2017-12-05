@@ -1,11 +1,6 @@
-/**
- * Created by shuding on 6/9/15.
- * <ds303077135@gmail.com>
- */
+import Constant from './constant';
 
-var Constant = require('script/kernels/constant');
-
-module.exports = ALU;
+export default ALU;
 
 function ALU() {
     function init(alu) {

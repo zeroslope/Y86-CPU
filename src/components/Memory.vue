@@ -1,17 +1,61 @@
 <template>
-  <h2>MEMORY</h2>
+  <v-card>
+    <v-layout column fixed >
+        <v-card style="min-height:270px;" class="grey lighten-3">
+          <v-list  class="grey lighten-3">
+            <v-list-tile style="max-height:24px" v-for="(item,index) in stack" :key="index" calss="pa-0 ma-0">
+                <p flat hover class="line">
+                  <tt class="caption">{{ '0x' + numToHex(index*4, 4) }}</tt>
+                  <span class="body-1 grey--text">{{ '0x' + memToHex(item) }}</span>
+                </p>
+            </v-list-tile>
+          </v-list>
+        </v-card>
+    </v-layout>
+  </v-card>
 </template>
 
 <script>
   export default {
     name: 'Memory',
+    props: ['stack'],
     data () {
       return {
+      }
+    },
+    methods: {
+      numToHex: function (value, len) {
+        if(typeof value == 'undefined' || value === null) {
+          return '';
+        }
+        if(value < 0) {
+          value = 0xffffffff + value + 1;
+        }
+        var res = value.toString(16);
+        while(res.length < len) {
+          res = '0' + res;
+        }
+        return res;
+      },
+      memToHex: function (value) {
+        if(typeof value == 'undefined' || value === null) {
+          return '';
+        }
+        var res = '';
+        for(var i = 0;i < value.length;++ i) {
+          res += this.numToHex(value[i], 2);
+        }
+        return res;
       }
     }
   }
 </script>
 
 <style scoped>
-
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+.line{
+  font-family: 'Courier New', Courier, monospace;
+}
 </style>

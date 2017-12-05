@@ -1,6 +1,6 @@
-var Utils = require('script/kernels/utils');
+import Utils from './utils';
 
-module.exports = Memory;
+export default Memory;
 
 function Memory() {
     this.data = [];
@@ -10,7 +10,7 @@ function Memory() {
             this.data[i] = [0, 0, 0, 0];
         }
     };
-    this.get    = function (address) {
+    this.get = function (address) {
         var index  = Math.floor(address / 4);
         var offset = address % 4;
         if (typeof this.data[index] == 'undefined') {
@@ -18,7 +18,7 @@ function Memory() {
         }
         return this.data[index][offset];
     };
-    this.set    = function (address, byte) {
+    this.set = function (address, byte) {
         var index  = Math.floor(address / 4);
         var offset = address % 4;
         if (typeof this.data[index] == 'undefined') {
@@ -40,7 +40,7 @@ Memory.prototype.readByte = function (address) {
 };
 
 Memory.prototype.writeInt = function (address, int) {
-    if (!Utils.checkNumber(int)) {
+    if (!Utils.isInt(int)) {
         throw new Error('Int error in `Memory writeInt`');
     }
     for (var i = 0; i < 4; ++i) {

@@ -1,13 +1,50 @@
-var Constant = require('./constant');
-var Util = require('./utils')
+import Constant from './constant';
 
-moudle.exports = {
+import Utils from './utils';
+
+export default {
     Register:       Register,
     PipeRegister:   PipeRegister
 };
 
+function Register() {
+
+    function init(register) {
+        Constant.REGISTERS.forEach(function (name) {
+            register[Constant[name]] = 0;
+        });
+    }
+
+    init(this);
+
+    this.get = function (name) {
+        if (!Utils.isInt(name)) {
+            if (typeof this[Constant[name]] === 'undefined') {
+                throw new Error('Register error undefined name: ' + name);
+            }
+            return this[Constant[name]];
+        }
+        return this[name];
+    }
+
+    this.set = function (name, value) {
+        if (!Utils.isInt(name)) {
+            if (typeof Constant[name] !== 'undefined' && name !== 'R_NONE') {
+                this[Constant[name]] = value;
+            } else {
+                return false;
+            }
+        }
+        if (!(0 <= name && name < 8))
+            return false;
+        this[name] = value;
+        return true;
+    };
+}
+
 function PipeRegister() {
-    this.F_predPc = 0;
+    this.F_predPC = 0;
+    this.F_stat   = Constant.S_AOK,
 
     this.D_stat  = Constant.S_BUB;
     this.D_icode = Constant.I_NOP;
@@ -43,58 +80,28 @@ function PipeRegister() {
     this.W_dstE  = Constant.R_NONE;
     this.W_dstM  = Constant.R_NONE;
 
-    this.get = function(name) {
-        if(typeof name === 'undefined') {
+    this.get = function (name) {
+        if (typeof this[name] === 'undefined') {
             throw new Error('Register error undefined name: ' + name);
         }
         return this[name];
-    }
+    };
 
-    this.set = function(name, value) {
-        if(typeof name === 'object') {
-            /*修改多个寄存器的值*/
-            for(key in name) {
-                if(name.hasOwnProperty(key)) {
-                    if(Util.isInt(name[key])) {
+    this.set = function (name, value) {
+        if (typeof name == 'object') {
+            for (var key in name) {
+                if (name.hasOwnProperty(key)) {
+                    if (Utils.isInt(name[key])) {
                         this[key] = name[key];
                     }
                 }
             }
         } else {
-            /*修改单个寄存器的值*/
-            assert(!Util.isInt(value));
+            if (!Utils.isInt(value)) {
+                return false;
+            }
             this[name] = value;
         }
+        return true;
     };
-};
-
-function Register() {
-    /*初始化寄存器*/
-    this.R_EAX = 0;
-    this.R_ECX = 0;
-    this.R_EDX = 0;
-    this.R_EBX = 0;
-    this.R_ESP = 0;
-    this.R_EBP = 0;
-    this.R_ESI = 0;
-    this.R_EDI = 0;
-
-    /*Register不存在返回０*/
-    this.get = function (id) {
-        if(typeof id === 'undefined') {
-            return 0;
-        }
-        if(id >= 0 && id < Constant[REGISTERS].length) {
-            return this[Constant[REGISTERS][id]];
-        }
-        return 0;
-    };
-
-    this.set = function (id, value) {
-        assert(Util.isInt(id));
-        if(id == Constant.R_NONE) return ;
-        assert(id >= 0 && id < Constant[REGISTERS].length);
-        this[Constant[REGISTERS][id]] = value;
-    };
-
-};
+}
