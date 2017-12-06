@@ -2,7 +2,7 @@
 
 > a simple y86 cpu
 
-## Build Setup
+## 环境配置
 
 ``` bash
 # install dependencies
@@ -17,6 +17,10 @@ For a detailed explanation on how things work, check out the [guide](http://vuej
 之后在浏览器(推荐`Chrome`,或其他现代浏览器)中打开`localhost:8080`,就可以看到Y86-CPU的界面。
 
 如果没有`node.js`的环境，请直接打开`http://118.89.196.163/` 。
+
+## 使用说明
+
+建议开启全屏模式进行使用。
 
 网站中初始的测试数据为`/src/test`文件夹下的`asum.yo`、`List_Sum.yo`、`Halt.yo`三个文件。
 
