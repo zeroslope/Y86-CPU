@@ -1,4 +1,4 @@
-# Y86 Simulator
+# Y86 -CPU
 
 > a simple y86 cpu
 
@@ -10,37 +10,27 @@ npm install
 
 # serve with hot reload at localhost:8080
 npm run dev
-
-# build for production with minification
-npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
-
-# run unit tests
-npm run unit
-
-# run all tests
-npm test
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
 
-## 技术栈
+之后在浏览器(推荐`Chrome`,或其他现代浏览器)中打开`localhost:8080`,就可以看到Y86-CPU的界面。
 
-1. vue.js
+如果没有`node.js`的环境，请直接打开`http://118.89.196.163/` 。
 
-  2. [vuetify.js]: https://vuetifyjs.com&quot;UI&quot;
+网站中初始的测试数据为`/src/test`文件夹下的`asum.yo`、`List_Sum.yo`、`Halt.yo`三个文件。
 
-2. mdi icon
+网站支持拖拽上传，仅支持`*.yo`文件，上传后将出现在最后一个`tab`中。
 
+有五种控制按键，从左到右依次为`单步后退`、`暂停`、`自动运行`、`单步前进`、`Reset`。
 
-### Vuetify
+网站中显示的数据有：`cycle`、`ZF OF CF`、`cpi`、`各个寄存器的值`、`写入代码之后内存的情况及变化`、`流水线的各个阶段的寄存器的值`、`最右侧的执行历史，点击可以跳转到之前执行的某个cycle`。
 
+当流水线中寄存器数值发生变化时，会有相应的动画。
 
+为了让动画效果更明显，默认频率的4Hz。
 
-npm install --save vue-material-design-icons
+当切换`tab`后，执行状态会执行`Reset` 。
 
-node.js 不能直接运行es6模块的代码
+测试数据的内存不宜过大。
 
-vue　webpack中不能混用require 和　import
