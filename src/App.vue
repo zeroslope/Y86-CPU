@@ -1,7 +1,6 @@
 <template>
-  <v-app class="grey lighten-2" style="height: 100%;">
+  <v-app style="height: 100%; background-color: #73ABC2">
     <div id="dropZone" @dragover.stop.prevent="handleDragOver" @drop.stop.prevent="handleFileSelect">
-    <!-- <img src="./assets/logo.png"> -->
     <v-card app>
       <v-layout row wrap>
           <v-flex xs12 md6>
@@ -38,16 +37,14 @@
               <v-layout row wrap align-start>
                 <v-flex xs12 md5>
                   <v-layout column wrap>
-                    <v-flex >
-                      <v-card class="grey lighten-3" elevation-5>
-                        <!-- <control></control> -->
-                          <v-layout>
+                    <v-flex style="background-color: #424341" class="ml-2 mr-2" elevation-2>
+                          <v-layout row>
                             <v-spacer></v-spacer>
                             <v-btn icon @click="backward">
                               <v-icon large color="teal">skip_previous</v-icon>
                             </v-btn>
                             <v-btn icon @click="pause">
-                              <v-icon large color="grey">pause</v-icon>
+                              <v-icon large style="color: #6BB6D3">pause</v-icon>
                             </v-btn>
                             <v-btn icon @click="start">
                               <v-icon large color="green">play_arrow</v-icon>
@@ -61,19 +58,19 @@
                             </v-btn>
                             <v-spacer></v-spacer>
                           </v-layout>
-                      </v-card>
+
                     </v-flex>
 
                     <v-flex>
                       <v-layout row wrap>
                         <v-flex class="mt-1 mb-1" style="height:60px;">
-                          <clock class="grey lighten-3" elevation-5 v-bind:clock="getCycle"></clock>
+                          <clock style="background-color: #F25F5C" elevation-5 v-bind:clock="getCycle"></clock>
                         </v-flex>
                         <v-flex class="mt-1 mb-1" style="height:60px;">
-                          <condition class="grey lighten-3" elevation-5 v-bind:cond="getCond"></condition>
+                          <condition style="background-color: #FFE885" elevation-5 v-bind:cond="getCond"></condition>
                         </v-flex>
                         <v-flex class="mt-1 mb-1" style="height:60px;">
-                          <cpi class="grey lighten-3" elevation-5 v-bind:cpi="getCpi"></cpi>
+                          <cpi style="background-color: #66CCFF" elevation-5 v-bind:cpi="getCpi"></cpi>
                         </v-flex>
                       </v-layout>
                     </v-flex>
@@ -81,9 +78,9 @@
                   <v-flex>
                     <v-layout row wrap>
                       <v-flex xs5 md4>
-                        <v-layout class="ma-0 pa-0" elevation-5>
-                          <v-flex  class="scroll ma-0" style="height:269px; overflow: scroll;">
-                              <registers  class="md-1 " v-bind:reg="getRegister"></registers>
+                        <v-layout class="ma-0 pa-0" elevation-4>
+                          <v-flex  class="scroll ma-0" style="height:269px;">
+                              <registers  class="md-1" v-bind:reg="getRegister"></registers>
                           </v-flex>
                         </v-layout>
                       </v-flex>
@@ -101,10 +98,10 @@
                 </v-flex>
                 <v-flex md7>
                     <v-card class="elevation-10" style="font-family: 'Courier New', Courier, monospace;">
-                      <v-layout style="background-color: #757575;">
+                      <v-layout style="background-color: #252524;">
                         <!-- style="background-color: #424242" -->
                         <v-tabs v-model="activeTab" centered class="pl-0">
-                          <v-tabs-bar dark class="grey mb-1 elevation-5">
+                          <v-tabs-bar dark class="mb-1 elevation-5" style="background-color: #424341;">
                             <v-tabs-item
                               v-for="tab in tabs"
                               :key="tab"
@@ -124,7 +121,7 @@
                               :id="tab"
                             >
                               <v-card dark flat hover v-for="(line,num) in tabData[index].split('\n')" :key='num'>
-                                  <pre class="deep-orange--text text--lighten-3"> {{(num+1) + '\t' + line}}　</pre>
+                                  <pre style="color: #C6C6C6"> {{(num+1) + '\t' + line}}　</pre>
                               </v-card>
                             </v-tabs-content>
                           </v-tabs-items>
@@ -135,7 +132,7 @@
               </v-layout>
             </v-flex>
 
-            <v-flex class="mt-3 ml-1" elevation-5>
+            <v-flex class="mt-3 ml-1" elevation-5 style="background-color: #3787A8">
               <pipe-line :fetch="getFetch" :decode="getDecode" :execute="getExecute" :memory="getMemory" :writeback="getWriteBack">
               </pipe-line>
             </v-flex>
@@ -386,6 +383,6 @@ export default {
   display: none;
 }
 pre {
-  background-color: #757575;
+  background-color: #252524;
 }
 </style>

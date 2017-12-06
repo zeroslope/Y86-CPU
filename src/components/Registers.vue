@@ -2,12 +2,12 @@
   <v-card>
     <v-layout column fixed >
         <v-card>
-          <v-list class="grey lighten-3">
-            <v-list-tile v-for="(item,index) in reg" :key="index">
-              <v-list-tile-content class='line'>
-                  <v-list-tile-title class="caption">{{ index }}</v-list-tile-title>
-                  <v-list-tile-sub-title class="body-1">{{ numToHex(reg[index], 8) }}</v-list-tile-sub-title>
-              </v-list-tile-content>
+          <v-list style="background-color: #70C1B3">
+            <v-list-tile style="max-height:31.5px" v-for="(item,index) in reg" :key="index">
+              <p class='line'>
+                  <tt class="caption" style="color: #2C2D2C">{{ index }}</tt>
+                  <span class="body-1" style="color: #3B3B3A">{{ numToHex(reg[index], 8) }}</span>
+              </p>
             </v-list-tile>
           </v-list>
         </v-card>
@@ -50,7 +50,7 @@
   display: none;
 }
 .line {
-  line-height:  13px;
+  line-height:  0px;
   /*height:       20px;*/
 }
 </style>

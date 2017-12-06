@@ -1,7 +1,7 @@
 <template>
   <v-card hover ripple>
     <h3 class="text-xs-center">CLOCK</h3>
-    <h2 class="text-xs-center">
+    <h2 class="text-xs-center" style="color: #FFE885">
       {{ clock }}
     </h2>
   </v-card>
