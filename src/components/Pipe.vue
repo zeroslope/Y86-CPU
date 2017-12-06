@@ -1,5 +1,5 @@
 <template>
-  <v-container flat fluid class="ma-0 pa-0" style="font-family: 'Courier New', Courier, monospace;">
+  <v-container flat fluid class="ma-0 pa-0" style="font-family: 'PT Mono', monospace;">
   <v-layout column dark class="pt-2">
     <v-flex>
       <v-layout row wrap>

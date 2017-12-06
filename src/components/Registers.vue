@@ -5,8 +5,8 @@
           <v-list style="background-color: #70C1B3">
             <v-list-tile style="max-height:31.5px" v-for="(item,index) in reg" :key="index">
               <p class='line'>
-                  <tt class="caption" style="color: #2C2D2C">{{ index }}</tt>
-                  <span class="body-1" style="color: #3B3B3A">{{ numToHex(reg[index], 8) }}</span>
+                  <tt style="color: #2C2D2C">{{ index }}</tt>
+                  <span style="color: #3B3B3A">{{ numToHex(reg[index], 8) }}</span>
               </p>
             </v-list-tile>
           </v-list>
@@ -51,6 +51,7 @@
 }
 .line {
   line-height:  0px;
+  font-family: 'Ubuntu Mono', monospace;
   /*height:       20px;*/
 }
 </style>

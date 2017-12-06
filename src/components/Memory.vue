@@ -1,12 +1,12 @@
 <template>
   <v-card>
-    <v-layout column fixed >
-        <v-card style="min-height:270px; background-color: #63AFD0;" >
+    <v-layout column fixed>
+        <v-card style="min-height:270px; background-color: #63AFD0;">
           <v-list style="background-color: #63AFD0">
             <v-list-tile style="max-height:24px" v-for="(item,index) in stack" :key="index" calss="pa-0 ma-0">
-                <p flat hover class="line">
-                  <tt class="caption">{{ '0x' + numToHex(index*4, 4) }}</tt>
-                  <span class="body-1" style="color: #3B3B3A">{{ '0x' + memToHex(item) }}</span>
+                <p class="line">
+                  <span >{{ '0x' + numToHex(index*4, 4) }}</span>
+                  <span style="color: #3B3B3A">{{ '0x' + memToHex(item) }}</span>
                 </p>
             </v-list-tile>
           </v-list>
@@ -55,7 +55,13 @@
 .scroll::-webkit-scrollbar {
   display: none;
 }
+p {
+  font-family: 'Ubuntu Mono', monospace;
+}
+span {
+  font-family: 'Ubuntu Mono', monospace;
+}
 .line{
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Ubuntu Mono', monospace;
 }
 </style>

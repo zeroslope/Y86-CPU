@@ -27,7 +27,7 @@
       </v-layout>
     </v-card>
 
-    <v-content>
+    <v-content style="font-family: 'Ubuntu Mono', monospace;">
       <v-container fluid grid-list-lg fill-height >
 
       <v-layout row class="mt-2">
@@ -97,7 +97,7 @@
                   </v-layout>
                 </v-flex>
                 <v-flex md7>
-                    <v-card class="elevation-10" style="font-family: 'Courier New', Courier, monospace;">
+                    <v-card class="elevation-10" style="font-family: 'Ubuntu Mono', monospace;">
                       <v-layout style="background-color: #252524;">
                         <!-- style="background-color: #424242" -->
                         <v-tabs v-model="activeTab" centered class="pl-0">
@@ -121,7 +121,7 @@
                               :id="tab"
                             >
                               <v-card dark flat hover v-for="(line,num) in tabData[index].split('\n')" :key='num'>
-                                  <pre style="color: #C6C6C6"> {{(num+1) + '\t' + line}}　</pre>
+                                  <pre style="color: #C6C6C6; font-family: 'PT Mono', monospace;"> {{(num+1) + '\t' + line}}　</pre>
                               </v-card>
                             </v-tabs-content>
                           </v-tabs-items>
@@ -383,6 +383,10 @@ export default {
   display: none;
 }
 pre {
+  font-family: 'Ubuntu Mono', monospace;
   background-color: #252524;
+}
+body {
+  font-family: 'Ubuntu Mono', monospace;
 }
 </style>
