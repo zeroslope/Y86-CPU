@@ -202,8 +202,7 @@ export default {
     Registers,
     Condition,
     PipeLine,
-    Cpi,
-    Chart
+    Cpi
   },
   created: function () {
     this.initParser(this.tabData[this.tabs.indexOf(this.activeTab)]);
