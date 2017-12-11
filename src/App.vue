@@ -58,7 +58,6 @@
                             </v-btn>
                             <v-spacer></v-spacer>
                           </v-layout>
-
                     </v-flex>
 
                     <v-flex>
@@ -148,8 +147,6 @@
             </div>
           </v-flex>
 
-
-
       </v-layout>
       </v-container>
     </v-content>
@@ -205,7 +202,8 @@ export default {
     Registers,
     Condition,
     PipeLine,
-    Cpi
+    Cpi,
+    Chart
   },
   created: function () {
     this.initParser(this.tabData[this.tabs.indexOf(this.activeTab)]);
