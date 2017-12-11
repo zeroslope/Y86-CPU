@@ -19,7 +19,7 @@
             <v-toolbar dark dense app>
               <v-spacer></v-spacer>
               <v-toolbar-title>By 55242</v-toolbar-title>
-              <v-btn icon href="https://github.com/vuejs/vue" target="_blank">
+              <v-btn icon href="https://github.com/55242/Y86-CPU" target="_blank">
                 <v-icon>mdi-github-circle</v-icon>
               </v-btn>
             </v-toolbar>
