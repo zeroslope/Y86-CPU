@@ -18,6 +18,9 @@ function Parser(text) {
         parser.Constant = Constant;
         parser.CPU      = new CPU();
 
+        text = text.replace(/\r\n/g, '\n'); 
+        text = text.replace(/\r/g, '\n');
+
         text.split('\n').forEach(function (rawLine, index) {
             parser.syntaxs.push(rawLine);
             //console.log(rawLine);
