@@ -359,7 +359,8 @@ export default {
             alert('文件类型错误，仅支持.yo文件');
           } else {
             that.tabData.push(output);
-            that.tabs.push(name);
+            that.tabs.push(name+that.tabData.length);
+            that.activeTab = name+that.tabData.length;
             console.log(typeof output);
             console.log(files.name.split('.')[0]);
           }
