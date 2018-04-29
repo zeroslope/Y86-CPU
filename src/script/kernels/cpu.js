@@ -241,19 +241,19 @@ CPU.prototype.forward = function () {
 
     async.parallel([
         async.asyncify(async function f1() {
-            await sleep(Math.random() * 200);
+            await sleep(200);
             writeBack(that);
         }),
         async.asyncify(async function f2() {
-            await sleep(Math.random() * 200);
+            await sleep(200);
             memory(that);
         }),
         async.asyncify(async function f3() {
-            await sleep(Math.random() * 200);
+            await sleep(200);
             execute(that);
         }),
         async.asyncify(async function f4() {
-            await sleep(Math.random() * 200);
+            await sleep(200);
             fetch(that);
         }),
     ], function(err, res) {
